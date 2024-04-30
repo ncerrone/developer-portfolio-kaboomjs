@@ -1,6 +1,6 @@
-import kaboom from "kaboom";
 import { kaboomContext } from "./kaboomCtx";
 import { scaleFactor } from "./constants";
+import { displayDialog } from "./utils";
 
 kaboomContext.loadSprite("spritesheet", "./spritesheet.png", {
   sliceX: 39,
@@ -16,13 +16,13 @@ kaboomContext.loadSprite("spritesheet", "./spritesheet.png", {
 });
 
 kaboomContext.loadSprite("map", "./map.png");
-kaboomContext.setBackground(k.Color.fromEx("#311047"));
+kaboomContext.setBackground(kaboomContext.Color.fromHex("#311047"));
 
-kaboomContext.scene("mainScene", async () => {
+kaboomContext.scene("main", async () => {
   const mapData = await (await fetch("./map.json")).json();
   const layers = mapData.layers;
 
-  const map = kaboomContext.make([
+  const map = kaboomContext.add([
     kaboomContext.sprite("map"),
     kaboomContext.pos(0),
     kaboomContext.scale(scaleFactor)
@@ -60,13 +60,31 @@ kaboomContext.scene("mainScene", async () => {
         if (boundary.name) {
           player.onCollide(boundary.name, () => {
             player.isInDialogue = true;
-            // TODO
+            displayDialog("TODO", () => player.isInDialogue = false);
           });
+        }
+      }
+      continue;
+    }
+
+    if (layer.name === "spawnpoints") {
+      for (const entity of layer.objects) {
+        if (entity.name === "player") {
+          player.pos = kaboomContext.vec2(
+            (map.pos.x + entity.x) * scaleFactor,
+            (map.pos.y + entity.y) * scaleFactor
+          );
+          kaboomContext.add(player);
+          continue;
         }
       }
     }
   }
+
+  kaboomContext.onUpdate(() => {
+    kaboomContext.camPos(player.pos.x, player.pos.y + 100);
+  });
 });
 
-kaboomContext.go("mainScene");
+kaboomContext.go("main");
 
