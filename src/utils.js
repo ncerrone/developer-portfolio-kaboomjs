@@ -21,10 +21,26 @@ export function displayDialog(text, onDisplayEnd) {
   function onCloseBtnClick() {
     onDisplayEnd();
     dialogueUI.style.display = "none";
-    dialogue.innerText = "";
+    dialogue.innerHTML = "";
     clearInterval(intervalRef);
     closeBtn.removeEventListener("click", onCloseBtnClick);
   }
 
   closeBtn.addEventListener("click", onCloseBtnClick);
+
+  addEventListener("keypress", (key) => {
+    if (key.code === "Enter") {
+      closeBtn.click();
+    }
+  });
+}
+
+export function setCamScale(kaboomContext) {
+  const resizeFactor = kaboomContext.width() / kaboomContext.height();
+  if (resizeFactor < 1) {
+    kaboomContext.camScale(kaboomContext.vec2(1));
+    return;
+  }
+
+  kaboomContext.camScale(kaboomContext.vec2(1.5));
 }
